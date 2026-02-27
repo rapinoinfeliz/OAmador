@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ferramentas Úteis | O AMADOR</title>
+    <meta
+      name="description"
+      content="Calculadora de pace, projetor de prova, zonas de potência por FTP e checklist interativo para triathlon."
+    />
+    <link rel="stylesheet" href="assets/styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js" defer></script>
+    <script src="assets/main.js" defer></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="container topbar-inner">
+        <a class="brand" href="index.html" aria-label="Página inicial O AMADOR">
+          <span class="brand-badge" aria-hidden="true"></span>
+          O AMADOR
+        </a>
+
+        <button class="menu-toggle" data-menu-toggle aria-expanded="false" aria-label="Abrir menu">Menu</button>
+
+        <nav class="main-nav" data-main-nav>
+          <a href="index.html">Início</a>
+          <a href="noticias.html">Notícias e Resenhas</a>
+          <a class="active" href="ferramentas.html">Ferramentas</a>
+          <a href="equipamentos.html">Equipamentos e Cupons</a>
+          <a href="lobo-assessoria.html">Lobo Assessoria</a>
+        </nav>
+
+        <a class="btn btn-primary hide-mobile" href="index.html#clube">Virar membro VIP</a>
+      </div>
+    </header>
+
+    <main>
+      <section class="page-hero">
+        <div class="container reveal">
+          <span class="eyebrow"><span class="dot" aria-hidden="true"></span> Ferramentas oficiais O AMADOR</span>
+          <h1 class="section-title">Ferramentas Úteis para o Amador</h1>
+          <p class="section-subtitle">Calculadora boa é a que resolve rápido. Sem frescura e sem achismo.</p>
+        </div>
+      </section>
+
+      <nav class="anchor-nav" aria-label="Navegação das ferramentas">
+        <div class="container">
+          <a href="#pace">Pace</a>
+          <a href="#projetor">Projetor de Prova</a>
+          <a href="#potencia">Zonas de Potência</a>
+          <a href="#checklist">Checklist T1/T2</a>
+        </div>
+      </nav>
+
+      <section id="pace" class="section">
+        <div class="container panel reveal">
+          <h2 class="section-title">Calculadora de Pace</h2>
+          <p class="section-subtitle">Descobrir pace médio ou projetar tempo final. Direto ao ponto.</p>
+
+          <form id="pace-form" class="tool-form" style="margin-top: 1rem">
+            <input type="hidden" id="pace-mode" value="discover" />
+            <div class="pace-mode" role="tablist" aria-label="Modos da calculadora de pace">
+              <button type="button" data-pace-mode="discover" class="active">Descobrir meu pace</button>
+              <button type="button" data-pace-mode="project">Projetar meu tempo</button>
+            </div>
+
+            <div id="pace-mode-time" class="form-grid">
+              <div>
+                <label for="pace-total-time">Tempo total (hh:mm:ss)</label>
+                <input class="input" id="pace-total-time" type="text" placeholder="01:52:30" required />
+              </div>
+              <div>
+                <label for="pace-distance">Distância (km)</label>
+                <input class="input" id="pace-distance" type="number" min="0.1" step="0.1" placeholder="21.1" required />
+              </div>
+            </div>
+
+            <div id="pace-mode-pace" class="form-grid" hidden>
+              <div>
+                <label for="target-pace">Pace alvo (mm:ss)</label>
+                <input class="input" id="target-pace" type="text" placeholder="05:10" />
+              </div>
+              <div>
+                <label for="target-distance">Distância (km)</label>
+                <input class="input" id="target-distance" type="number" min="0.1" step="0.1" placeholder="10" />
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button class="btn btn-primary" type="submit">Calcular sem enrolação</button>
+              <button class="btn btn-secondary" id="pace-clear" type="button">Limpar campos</button>
+            </div>
+          </form>
+
+          <div id="pace-result" class="output" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <section id="projetor" class="section">
+        <div class="container panel reveal">
+          <h2 class="section-title">Projetor de Tempo de Prova</h2>
+          <p class="section-subtitle">Simule sua prova com ritmo real de natação, bike, corrida e transições.</p>
+
+          <form id="race-form" style="margin-top: 1rem">
+            <div class="form-grid cols-3">
+              <div>
+                <label for="race-distance">Distância da prova</label>
+                <select id="race-distance">
+                  <option value="super_sprint">Super Sprint</option>
+                  <option value="sprint">Sprint</option>
+                  <option value="olimpico">Olímpico</option>
+                  <option value="half">70.3</option>
+                  <option value="full">Full Ironman</option>
+                </select>
+              </div>
+              <div>
+                <label for="swim-pace">Natação (pace/100m)</label>
+                <input class="input" id="swim-pace" type="text" placeholder="02:05" required />
+              </div>
+              <div>
+                <label for="bike-speed">Ciclismo (km/h)</label>
+                <input class="input" id="bike-speed" type="number" min="1" step="0.1" placeholder="34" required />
+              </div>
+              <div>
+                <label for="run-pace">Corrida (pace/km)</label>
+                <input class="input" id="run-pace" type="text" placeholder="04:55" required />
+              </div>
+              <div>
+                <label for="t1-time">T1 (min)</label>
+                <input class="input" id="t1-time" type="number" min="0" step="0.1" placeholder="3.5" required />
+              </div>
+              <div>
+                <label for="t2-time">T2 (min)</label>
+                <input class="input" id="t2-time" type="number" min="0" step="0.1" placeholder="2.0" required />
+              </div>
+            </div>
+
+            <p id="race-distance-note" class="small" style="margin-top: 0.65rem"></p>
+
+            <div class="form-actions">
+              <button class="btn btn-primary" type="submit">Projetar meu tempo final</button>
+            </div>
+          </form>
+
+          <div id="race-results" class="race-results" style="margin-top: 0.9rem"></div>
+          <div id="race-summary" class="output" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <section id="potencia" class="section">
+        <div class="container panel reveal">
+          <h2 class="section-title">Calculadora de Zonas de Potência (FTP)</h2>
+          <p class="section-subtitle">Informe seu FTP e receba as zonas em watts para treinar sem confusão.</p>
+
+          <form id="power-form" style="margin-top: 1rem">
+            <div class="form-grid">
+              <div>
+                <label for="ftp-value">FTP (Watts)</label>
+                <input class="input" id="ftp-value" type="number" min="50" step="1" placeholder="260" required />
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button class="btn btn-primary" type="submit">Gerar zonas em watts</button>
+              <button class="btn btn-secondary" id="copy-zones" type="button">Copiar zonas</button>
+              <button class="btn btn-secondary" id="pdf-zones" type="button">Baixar PDF</button>
+            </div>
+          </form>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Zona</th>
+                  <th>Faixa</th>
+                  <th>Foco</th>
+                </tr>
+              </thead>
+              <tbody id="zones-body"></tbody>
+            </table>
+          </div>
+          <div id="power-feedback" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <section id="checklist" class="section">
+        <div class="container panel reveal">
+          <h2 class="section-title">Checklist Interativo de Prova (T1 e T2)</h2>
+          <p class="section-subtitle">Chega de esquecer meia, número ou dignidade na transição.</p>
+
+          <div class="form-actions" style="margin-top: 1rem">
+            <button class="btn btn-secondary" id="check-all" type="button">Marcar tudo</button>
+            <button class="btn btn-secondary" id="uncheck-all" type="button">Limpar lista</button>
+            <span id="checklist-progress" class="small"></span>
+          </div>
+
+          <div id="checklist-container" class="checklist-grid" style="margin-top: 1rem"></div>
+
+          <div class="form-grid" style="margin-top: 1rem">
+            <div>
+              <label for="checklist-email">Seu e-mail</label>
+              <input class="input" id="checklist-email" type="email" placeholder="voce@email.com" />
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button class="btn btn-primary" id="send-checklist" type="button">Enviar checklist por e-mail</button>
+            <button class="btn btn-secondary" id="pdf-checklist" type="button">Baixar checklist em PDF</button>
+          </div>
+          <div id="checklist-feedback" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container panel reveal">
+          <h2 class="section-title">Quer bater meta de verdade?</h2>
+          <p class="section-subtitle">Treino individual com periodização, fortalecimento e constância. Sem fórmula mágica.</p>
+          <a class="btn btn-whatsapp" data-whatsapp-link href="#">Falar com a Lobo Assessoria no WhatsApp</a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container footer-grid">
+        <span>O AMADOR | Ferramenta boa é ferramenta que resolve.</span>
+        <span>© <span data-year></span> Diego Ferraz. #deuruim só se não treinar.</span>
+      </div>
+    </footer>
+
+    <a class="whatsapp-float" data-whatsapp-link href="#" aria-label="Tirar dúvida com a Lobo Assessoria">WhatsApp Lobo</a>
+  </body>
+</html>
