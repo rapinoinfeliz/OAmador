@@ -11,7 +11,10 @@ npm install
 npm run dev
 ```
 
-API local: `http://localhost:8787`
+O mesmo servidor entrega site + API na mesma porta.
+- Porta padrão: `8787`
+- Se estiver ocupada, ele tenta automaticamente `8788`, `8789`, etc.
+- Lista visual das corridas: `http://localhost:8787/calendario.html`
 
 ## Endpoints
 

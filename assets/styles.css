@@ -765,6 +765,215 @@ th {
   line-height: 1;
 }
 
+.calendar-shell {
+  display: grid;
+  gap: 1rem;
+}
+
+.calendar-filters {
+  display: grid;
+  grid-template-columns: 1fr 1fr 2fr auto;
+  gap: 0.7rem;
+  align-items: end;
+}
+
+.calendar-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  justify-content: space-between;
+  align-items: center;
+  color: #c6d5e0;
+}
+
+.calendar-count {
+  font-family: 'Teko', sans-serif;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 1.55rem;
+  line-height: 1;
+}
+
+.race-month-block {
+  margin-top: 0.6rem;
+}
+
+.race-month-title {
+  font-family: 'Teko', sans-serif;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 1.9rem;
+  color: #ffcf7c;
+  margin-bottom: 0.45rem;
+}
+
+.race-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.race-card {
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: linear-gradient(155deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%);
+  padding: 0.85rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.race-card::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  pointer-events: none;
+  border: 1px solid rgba(255, 90, 34, 0.2);
+}
+
+.race-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.7rem;
+}
+
+.race-date-pill {
+  font-family: 'Teko', sans-serif;
+  font-size: 1.45rem;
+  line-height: 1;
+  letter-spacing: 0.05em;
+  border-radius: 999px;
+  padding: 0.22rem 0.65rem;
+  background: linear-gradient(110deg, #ff5a22 0%, #ffd166 100%);
+  color: #121212;
+}
+
+.race-distance-pill {
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 0.2rem 0.62rem;
+  font-size: 0.88rem;
+  color: #d5e4ef;
+}
+
+.race-card h3 {
+  margin: 0.72rem 0 0.25rem;
+  font-family: 'Teko', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 1.7rem;
+  line-height: 0.98;
+}
+
+.race-city {
+  margin: 0;
+  font-size: 1rem;
+  color: #9dc2de;
+  font-weight: 700;
+}
+
+.race-actions {
+  margin-top: 0.8rem;
+  display: flex;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+
+.calendar-empty {
+  border-radius: 14px;
+  border: 1px dashed rgba(255, 255, 255, 0.26);
+  padding: 1rem;
+  text-align: center;
+  color: #b4cbdd;
+}
+
+.race-card.is-loading {
+  opacity: 0.62;
+}
+
+.race-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 160;
+  background: rgba(4, 11, 17, 0.7);
+  backdrop-filter: blur(4px);
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+}
+
+.race-modal {
+  width: min(100%, 700px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: linear-gradient(145deg, rgba(11, 28, 43, 0.98), rgba(9, 22, 34, 0.98));
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+  padding: 1rem;
+}
+
+.race-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.7rem;
+}
+
+.race-modal-header h3 {
+  margin: 0;
+  font-family: 'Teko', sans-serif;
+  font-size: 2rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 0.95;
+}
+
+.modal-close {
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #dce8f1;
+  background: transparent;
+  border-radius: 999px;
+  width: 34px;
+  height: 34px;
+  cursor: pointer;
+}
+
+.race-modal-grid {
+  margin-top: 0.9rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+
+.race-modal-grid div {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  padding: 0.62rem;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.race-modal-grid strong {
+  display: block;
+  font-size: 0.78rem;
+  color: #9bc0dc;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.race-modal-grid span {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 1.06rem;
+  font-weight: 700;
+}
+
+.race-modal-actions {
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
 .reveal {
   opacity: 0;
   transform: translateY(20px);
@@ -782,6 +991,14 @@ th {
   .plan-grid,
   .catalog-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .calendar-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .race-grid {
+    grid-template-columns: 1fr;
   }
 
   .checklist-grid {
@@ -832,7 +1049,12 @@ th {
   .plan-grid,
   .catalog-grid,
   .race-results,
-  .checklist-grid {
+  .checklist-grid,
+  .race-modal-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .calendar-filters {
     grid-template-columns: 1fr;
   }
 

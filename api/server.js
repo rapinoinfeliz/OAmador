@@ -1,10 +1,16 @@
 import express from 'express';
 import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { getAvailableStates, getCalendarByState, getRaceDetails } from './corridasbr.js';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const rootDir = path.resolve(__dirname, '..');
 const app = express();
-const port = Number(process.env.PORT || 8787);
+const requestedPort = Number(process.env.PORT || 8787);
 
+app.disable('x-powered-by');
 app.use(cors());
 app.use(express.json());
 
@@ -86,13 +92,36 @@ app.get('/api/race/:state/:id', async (req, res) => {
   }
 });
 
-app.use((_req, res) => {
+// Serve o site estático na mesma aplicação da API.
+app.use(express.static(rootDir, { extensions: ['html'] }));
+
+app.use('/api', (_req, res) => {
   res.status(404).json({
     error: 'Rota não encontrada',
     available_routes: ['/api/health', '/api/states', '/api/calendar?state=SC', '/api/race/SC/53035']
   });
 });
 
-app.listen(port, () => {
-  console.log(`API no ar em http://localhost:${port}`);
+app.use((_req, res) => {
+  res.status(404).type('text/plain').send('Página não encontrada.');
 });
+
+function startServer(port, retriesLeft = 10) {
+  const server = app.listen(port, () => {
+    console.log(`Site + API no ar em http://localhost:${port}`);
+  });
+
+  server.on('error', (error) => {
+    if (error && error.code === 'EADDRINUSE' && retriesLeft > 0) {
+      const nextPort = port + 1;
+      console.warn(`Porta ${port} ocupada. Tentando ${nextPort}...`);
+      startServer(nextPort, retriesLeft - 1);
+      return;
+    }
+
+    console.error('Falha ao subir servidor:', error);
+    process.exit(1);
+  });
+}
+
+startServer(requestedPort);

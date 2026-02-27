@@ -42,10 +42,13 @@ const CHECKLIST_GROUPS = {
   pos_prova: ['Roupa seca', 'Chinelo', 'Recuperador', 'Documento/Cartão', 'Cara de sapo em paz']
 };
 
+const MONTH_ORDER = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+
 document.addEventListener('DOMContentLoaded', () => {
   setupCommonUI();
   setupHomePage();
   setupToolsPage();
+  setupCalendarPage();
 });
 
 function setupCommonUI() {
@@ -192,6 +195,268 @@ function setupToolsPage() {
   setupRaceProjector();
   setupPowerZones();
   setupChecklist();
+}
+
+function setupCalendarPage() {
+  const page = document.getElementById('calendar-page');
+  if (!page) {
+    return;
+  }
+
+  const stateSelect = document.getElementById('calendar-state');
+  const monthSelect = document.getElementById('calendar-month');
+  const searchInput = document.getElementById('calendar-search');
+  const refreshBtn = document.getElementById('calendar-refresh');
+  const listNode = document.getElementById('calendar-list');
+  const metaNode = document.getElementById('calendar-meta');
+  const countNode = document.getElementById('calendar-count');
+  const modal = document.getElementById('race-modal');
+  const modalTitle = document.getElementById('race-modal-title');
+  const modalBody = document.getElementById('race-modal-body');
+
+  if (!stateSelect || !monthSelect || !searchInput || !refreshBtn || !listNode || !metaNode || !countNode || !modal || !modalTitle || !modalBody) {
+    return;
+  }
+
+  const state = {
+    selectedUf: 'SC',
+    selectedMonth: 'all',
+    searchTerm: '',
+    races: [],
+    isLoading: false
+  };
+
+  const queryUf = new URLSearchParams(window.location.search).get('state');
+  if (queryUf && /^[A-Za-z]{2}$/.test(queryUf)) {
+    state.selectedUf = queryUf.toUpperCase();
+  }
+
+  const closeModal = () => {
+    modal.hidden = true;
+    document.body.style.overflow = '';
+  };
+
+  const openModal = (title, bodyHtml) => {
+    modalTitle.textContent = title;
+    modalBody.innerHTML = bodyHtml;
+    modal.hidden = false;
+    document.body.style.overflow = 'hidden';
+  };
+
+  modal.addEventListener('click', (event) => {
+    if (event.target instanceof HTMLElement && (event.target.dataset.modalClose !== undefined || event.target === modal)) {
+      closeModal();
+    }
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && !modal.hidden) {
+      closeModal();
+    }
+  });
+
+  stateSelect.addEventListener('change', () => {
+    state.selectedUf = stateSelect.value;
+    loadCalendar();
+  });
+
+  monthSelect.addEventListener('change', () => {
+    state.selectedMonth = monthSelect.value;
+    renderCalendar();
+  });
+
+  searchInput.addEventListener('input', () => {
+    state.searchTerm = searchInput.value.trim().toLowerCase();
+    renderCalendar();
+  });
+
+  refreshBtn.addEventListener('click', () => {
+    loadCalendar(true);
+  });
+
+  listNode.addEventListener('click', async (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) {
+      return;
+    }
+
+    const button = target.closest('[data-race-details]');
+    if (!button) {
+      return;
+    }
+
+    const raceId = button.getAttribute('data-race-details');
+    if (!raceId) {
+      return;
+    }
+
+    openModal('Carregando detalhes...', '<p class="small">Puxando os dados oficiais da prova...</p>');
+
+    try {
+      const response = await fetch(`/api/race/${encodeURIComponent(state.selectedUf)}/${encodeURIComponent(raceId)}`);
+      if (!response.ok) {
+        throw new Error(`Falha ao carregar detalhes (HTTP ${response.status})`);
+      }
+      const race = await response.json();
+
+      openModal(
+        race.title || 'Detalhes da prova',
+        `
+          <div class="race-modal-grid">
+            <div><strong>Data</strong><span>${escapeHtml(race.date || 'Não informado')}</span></div>
+            <div><strong>Cidade</strong><span>${escapeHtml(race.city || 'Não informado')}</span></div>
+            <div><strong>Distância</strong><span>${escapeHtml(race.distance || 'Não informado')}</span></div>
+            <div><strong>UF</strong><span>${escapeHtml(race.state || state.selectedUf)}</span></div>
+          </div>
+          <div class="race-modal-actions">
+            ${race.info_url ? `<a class="btn btn-primary" target="_blank" rel="noopener noreferrer" href="${escapeHtml(race.info_url)}">Mais informações</a>` : ''}
+            ${race.registration_url ? `<a class="btn btn-secondary" target="_blank" rel="noopener noreferrer" href="${escapeHtml(race.registration_url)}">Inscrição</a>` : ''}
+            ${race.regulation_url ? `<a class="btn btn-secondary" target="_blank" rel="noopener noreferrer" href="${escapeHtml(race.regulation_url)}">Regulamento</a>` : ''}
+          </div>
+          <p class="small">Sempre confirme os dados direto com a organização.</p>
+        `
+      );
+    } catch (error) {
+      openModal('Deu ruim no detalhe', `<p>${escapeHtml(error.message)}</p>`);
+    }
+  });
+
+  async function loadStates() {
+    try {
+      const response = await fetch('/api/states');
+      if (!response.ok) {
+        throw new Error('Não consegui carregar as UFs.');
+      }
+      const payload = await response.json();
+      const states = Array.isArray(payload.states) ? payload.states : [];
+      stateSelect.innerHTML = states
+        .map((entry) => {
+          const uf = escapeHtml(entry.state || '');
+          const selected = uf === state.selectedUf ? 'selected' : '';
+          return `<option value="${uf}" ${selected}>${uf}</option>`;
+        })
+        .join('');
+    } catch (error) {
+      stateSelect.innerHTML = '<option value="SC">SC</option>';
+      state.selectedUf = 'SC';
+      metaNode.innerHTML = renderAlert('Falha ao buscar lista de estados. Usei SC como padrão.', 'error');
+    }
+  }
+
+  async function loadCalendar(forceRefresh = false) {
+    if (state.isLoading) {
+      return;
+    }
+    state.isLoading = true;
+    listNode.innerHTML = buildCalendarSkeleton(8);
+    countNode.textContent = 'Carregando...';
+    metaNode.textContent = 'Buscando calendário na CorridasBR.';
+
+    try {
+      const params = new URLSearchParams({ state: state.selectedUf });
+      if (forceRefresh) {
+        params.set('refresh', '1');
+      }
+      const response = await fetch(`/api/calendar?${params.toString()}`);
+      if (!response.ok) {
+        throw new Error(`Não consegui carregar o calendário (HTTP ${response.status}).`);
+      }
+
+      const payload = await response.json();
+      state.races = Array.isArray(payload.races) ? payload.races : [];
+      refreshMonthOptions(state.races);
+      renderCalendar(payload.fetched_at);
+    } catch (error) {
+      listNode.innerHTML = `<div class="calendar-empty">${escapeHtml(error.message)}</div>`;
+      countNode.textContent = '0 provas';
+      metaNode.textContent = 'Tenta novamente em alguns segundos.';
+    } finally {
+      state.isLoading = false;
+    }
+  }
+
+  function refreshMonthOptions(races) {
+    const available = new Set(races.map((race) => normalizeMonthLabel(race.month_label)).filter(Boolean));
+    const previous = state.selectedMonth;
+    const options = ['<option value="all">Todos os meses</option>'];
+
+    MONTH_ORDER.forEach((month) => {
+      if (available.has(month)) {
+        options.push(`<option value="${month}">${capitalize(month)}</option>`);
+      }
+    });
+
+    monthSelect.innerHTML = options.join('');
+    if (previous && (previous === 'all' || available.has(previous))) {
+      monthSelect.value = previous;
+      state.selectedMonth = previous;
+      return;
+    }
+    monthSelect.value = 'all';
+    state.selectedMonth = 'all';
+  }
+
+  function renderCalendar(fetchedAt) {
+    const filtered = state.races.filter((race) => {
+      const month = normalizeMonthLabel(race.month_label);
+      const byMonth = state.selectedMonth === 'all' || state.selectedMonth === month;
+      if (!byMonth) {
+        return false;
+      }
+
+      if (!state.searchTerm) {
+        return true;
+      }
+
+      const searchBlob = `${race.race_name} ${race.city} ${race.distance}`.toLowerCase();
+      return searchBlob.includes(state.searchTerm);
+    });
+
+    countNode.textContent = `${filtered.length} prova${filtered.length === 1 ? '' : 's'}`;
+    metaNode.textContent = fetchedAt ? `Fonte: CorridasBR | atualizado em ${formatDate(fetchedAt)}` : 'Fonte: CorridasBR';
+
+    if (!filtered.length) {
+      listNode.innerHTML = '<div class="calendar-empty">Nenhuma prova com esse filtro. Ajusta e tenta de novo.</div>';
+      return;
+    }
+
+    const grouped = MONTH_ORDER.map((month) => ({
+      month,
+      races: filtered.filter((race) => normalizeMonthLabel(race.month_label) === month)
+    })).filter((entry) => entry.races.length);
+
+    listNode.innerHTML = grouped
+      .map((group) => {
+        const cards = group.races
+          .map(
+            (race) => `
+              <article class="race-card">
+                <div class="race-card-top">
+                  <div class="race-date-pill">${escapeHtml(race.date_display || '--.--')}</div>
+                  <span class="race-distance-pill">${escapeHtml(race.distance || 'Distância não informada')}</span>
+                </div>
+                <h3>${escapeHtml(race.race_name || 'Corrida sem nome')}</h3>
+                <p class="race-city">${escapeHtml(race.city || 'Cidade não informada')}</p>
+                <div class="race-actions">
+                  <button type="button" class="btn btn-secondary" data-race-details="${escapeHtml(race.id)}">Ver detalhes</button>
+                  ${race.details_url ? `<a class="btn btn-primary" target="_blank" rel="noopener noreferrer" href="${escapeHtml(race.details_url)}">Abrir CorridasBR</a>` : ''}
+                </div>
+              </article>
+            `
+          )
+          .join('');
+
+        return `
+          <section class="race-month-block">
+            <div class="race-month-title">${capitalize(group.month)}</div>
+            <div class="race-grid">${cards}</div>
+          </section>
+        `;
+      })
+      .join('');
+  }
+
+  loadStates().then(() => loadCalendar());
 }
 
 function setupPaceCalculator() {
@@ -563,6 +828,46 @@ function getTagValue(element, tags) {
     }
   }
   return '';
+}
+
+function normalizeMonthLabel(value) {
+  const text = String(value || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim();
+  if (text === 'marco') {
+    return 'março';
+  }
+  return MONTH_ORDER.find((month) => month.normalize('NFD').replace(/[\u0300-\u036f]/g, '') === text) || '';
+}
+
+function capitalize(value) {
+  const text = String(value || '');
+  if (!text) {
+    return '';
+  }
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
+function buildCalendarSkeleton(count = 6) {
+  return Array.from({ length: count })
+    .map(
+      () => `
+        <article class="race-card is-loading">
+          <div class="race-card-top">
+            <div class="race-date-pill">--.--</div>
+            <span class="race-distance-pill">...</span>
+          </div>
+          <h3>Carregando prova</h3>
+          <p class="race-city">Aguenta que já vem.</p>
+          <div class="race-actions">
+            <span class="btn btn-secondary">...</span>
+          </div>
+        </article>
+      `
+    )
+    .join('');
 }
 
 function parseTimeToSeconds(value) {

@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Calendário de Corridas | O AMADOR</title>
+    <meta
+      name="description"
+      content="Calendário de corridas por estado com visual limpo, filtros rápidos e detalhes das provas via API do O AMADOR."
+    />
+    <link rel="stylesheet" href="assets/styles.css" />
+    <script src="assets/main.js" defer></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="container topbar-inner">
+        <a class="brand" href="index.html" aria-label="Página inicial O AMADOR">
+          <span class="brand-badge" aria-hidden="true"></span>
+          O AMADOR
+        </a>
+
+        <button class="menu-toggle" data-menu-toggle aria-expanded="false" aria-label="Abrir menu">Menu</button>
+
+        <nav class="main-nav" data-main-nav>
+          <a href="index.html">Início</a>
+          <a href="noticias.html">Notícias e Resenhas</a>
+          <a href="ferramentas.html">Ferramentas</a>
+          <a class="active" href="calendario.html">Calendário</a>
+          <a href="equipamentos.html">Equipamentos e Cupons</a>
+          <a href="lobo-assessoria.html">Lobo Assessoria</a>
+        </nav>
+
+        <a class="btn btn-primary hide-mobile" href="index.html#clube">Virar membro VIP</a>
+      </div>
+    </header>
+
+    <main id="calendar-page">
+      <section class="page-hero">
+        <div class="container reveal">
+          <span class="eyebrow"><span class="dot" aria-hidden="true"></span> CorridasBR + O AMADOR</span>
+          <h1 class="section-title">Calendário de Corridas sem gambiarra visual</h1>
+          <p class="section-subtitle">
+            Aqui você filtra por estado, mês e cidade com uma interface decente. JSON por baixo, lista bonita por cima.
+          </p>
+        </div>
+      </section>
+
+      <section class="section" style="padding-top: 1.2rem">
+        <div class="container panel calendar-shell reveal">
+          <div class="calendar-filters">
+            <div>
+              <label for="calendar-state">Estado (UF)</label>
+              <select id="calendar-state" aria-label="Selecionar estado"></select>
+            </div>
+            <div>
+              <label for="calendar-month">Mês</label>
+              <select id="calendar-month" aria-label="Selecionar mês">
+                <option value="all">Todos os meses</option>
+              </select>
+            </div>
+            <div>
+              <label for="calendar-search">Busca rápida</label>
+              <input id="calendar-search" class="input" type="search" placeholder="Ex: Palhoça, 10km, Night Run" />
+            </div>
+            <div>
+              <label>&nbsp;</label>
+              <button class="btn btn-secondary" id="calendar-refresh" type="button">Atualizar agora</button>
+            </div>
+          </div>
+
+          <div class="calendar-meta">
+            <span class="calendar-count" id="calendar-count">Carregando...</span>
+            <span class="small" id="calendar-meta">Buscando calendário na CorridasBR.</span>
+          </div>
+
+          <div id="calendar-list" aria-live="polite"></div>
+        </div>
+      </section>
+    </main>
+
+    <div id="race-modal" class="race-modal-backdrop" hidden>
+      <div class="race-modal" role="dialog" aria-modal="true" aria-labelledby="race-modal-title">
+        <div class="race-modal-header">
+          <h3 id="race-modal-title">Detalhes da prova</h3>
+          <button class="modal-close" data-modal-close aria-label="Fechar modal">×</button>
+        </div>
+        <div id="race-modal-body"></div>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <div class="container footer-grid">
+        <span>Calendário com estilo, sem perder o rigor dos dados.</span>
+        <span>© <span data-year></span> O AMADOR. #deuruim só sem planejamento.</span>
+      </div>
+    </footer>
+
+    <a class="whatsapp-float" data-whatsapp-link href="#" aria-label="Tirar dúvida com a Lobo Assessoria">WhatsApp Lobo</a>
+  </body>
+</html>
